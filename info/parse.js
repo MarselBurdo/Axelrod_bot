@@ -10,7 +10,9 @@ const tmp = fs.readFileSync('./info/cmp.csv', 'utf-8')
     .split('\n')
     .map((el)=> el.replace(/"/g, '')
         .split(','))
-    .map((el)=>el.slice(0, 2))
+    .map((el)=>el.slice(0, 2).reverse())
+const last= tmp.pop()
+console.log(last);
 // .forEach(el=> el.map(elem=> elem.toUpperCase()))
 const stockObj = Object.fromEntries(tmp);
 

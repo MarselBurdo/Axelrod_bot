@@ -1,30 +1,38 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable require-jsdoc */
+require('dotenv').config();
 const Scene = require('telegraf/scenes/base');
-const { stockObj } = require('./info/parse');
-// console.log(stockObj.get('amzn'));
+const fetch = require('node-fetch');
+const {stockObj} = require('./info/parse');
+const regex = /[a-z]/gi;
+// console.log(stockObj);
 
 class ScenesGenerator {
   GenStockScene() {
     const stock = new Scene('stock');
     stock.enter(async (ctx) => {
-      await ctx.reply('Which company price?');
+      await ctx.reply('Which company price?(english)');
     });
     stock.on('text', async (ctx) => {
       const companyName = ctx.message.text.toLowerCase();
-      // console.log(typeof companyName);
       let tmp;
-      if (companyName && (typeof companyName === 'string')) {
-        Object.values(stockObj).forEach(el=> {
-          if (el.includes(companyName)){
-            console.log(1);
+      console.log(companyName.search(regex));
+      if (companyName.search(regex)!== -1) {
+        for (const key in stockObj) {
+          if (key.includes(companyName)) {
+            tmp= key;
           }
-        });
-
         }
-        // console.log(tmp);
-
-      
+        const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockObj[tmp]}&apikey=${process.env.API_KEY}`);
+        const result = await response.json();
+        // console.log(result);
+        ctx.reply(
+            `Company name:   "${companyName.toUpperCase()}"
+Symbol in Nasdaq:     ${result['Meta Data']['2. Symbol'].toUpperCase()}
+`);
+      } else {
+        ctx.reply('Please, write company name in English')
+      }
     });
     stock.on('message', (ctx) => ctx.reply(' Please, write company name!'));
     return stock;
