@@ -1,5 +1,6 @@
-/* eslint-disable guard-for-in */
 /* eslint-disable linebreak-style */
+/* eslint-disable no-unused-vars */
+/* eslint-disable guard-for-in */
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 require('dotenv').config();
@@ -27,15 +28,17 @@ class ScenesGenerator {
           } else {
           };
         }
-        const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockObj[tmp]}&apikey=${process.env.API_KEY}`);
+        const response = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockObj[tmp]}&apikey=${process.env.API_KEY}`);
         const result = await response.json();
         // console.log(result);
-        if (result['Meta Data']) {
-          await ctx.reply(
-              `Company name:   "${companyName.toUpperCase()}"
-Symbol in Nasdaq:     ${result['Meta Data']['2. Symbol'].toUpperCase()}
+        if (result['Global Quote']['01. symbol']) {
+          await ctx.reply(` ${ctx.message.chat.first_name} you wanted information about "${companyName.toUpperCase()}" company  
+Symbol in Nasdaq:     ${result['Global Quote']['01. symbol'].toUpperCase()}
+Open price:  ${result['Global Quote']['02. open']}$
+Change per day:  ${result['Global Quote']['09. change']}$
+Change percent:  ${result['Global Quote']['10. change percent']}
             `);
-            ctx.scene.enter('name')
+          await ctx.scene.enter('name');
         } else {
           await ctx.scene.reenter();
         }
@@ -48,18 +51,19 @@ Symbol in Nasdaq:     ${result['Meta Data']['2. Symbol'].toUpperCase()}
   }
   GenNameScene() {
     const name = new Scene('name');
-    name.enter((ctx) => ctx.reply('What you name?'));
+    name.enter((ctx) => ctx.reply(`${ctx.message.chat.first_name}, now I hope you enjoy the Super Axe Bot.
+Please, write your opinion: `));
     name.on('text', async (ctx) => {
       const name = ctx.message.text;
       if (name) {
-        await ctx.reply(`Hello sweety, ${name}`);
+        await ctx.reply(`Thank you for comment: ${name}`);
         await ctx.scene.leave();
       } else {
-        await ctx.reply('Forgot your name? You idiot?');
+        await ctx.reply('Really?');
         await ctx.reenter();
       }
     });
-    name.on('message', (ctx) => ctx.reply('Forgot your name? You idiot?'));
+    name.on('message', (ctx) => ctx.reply('REally?'));
     return name;
   }
 }
